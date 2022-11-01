@@ -5,33 +5,38 @@ import os
 import requests
 import sys
 import logging
+import re
+import pandas as pd
 
 # logging
-LOGGER = logging.getLogger("wf-monitor")
+LOGGER = logging.getLogger()
 logging.basicConfig(
     format = "%(asctime)s %(name)-12s %(levelname)-8s %(message)s", level = logging.INFO)
 
-def prepare_folder(file_name):
-    location = os.path.dirname(file_name)
-    if location:
-        os.makedirs(location, exist_ok=True)
-
-def save_website(url, file_name):
+def page_url(n):
     '''
     Summary
     ----------
-    Data from a webpage is read and stored.
 
     Parameters
     ----------
-    url (str): url address of a webpage
-    file_name (str): name of file in which data will be written
 
     Returns
     ----------
-    nothing
     '''
-    
+    return f'https://www.audible.com/search?feature_six_browse-bin=18685580011&pageSize=50&sort=review-rank&page={n}&ref=a_search_c4_pageNum_{n}'
+
+def save_html(url, file_name):
+    '''
+    Summary
+    ----------
+
+    Parameters
+    ----------
+
+    Returns
+    ----------
+    '''
     try:
         logger.info(f'Saving {url}...')
         sys.stdout.flush()
@@ -42,23 +47,67 @@ def save_website(url, file_name):
     except requests.exceptions.ConnectionError:
         logger.info("Webpage doesn't exist!")
     else:
-        prepare_folder()
+        location = os.path.dirname(file_name)
+        if location:
+            os.makedirs(location, exist_ok=True)
         with open(file_name, 'w', encoding='utf-8') as datoteka:
             datoteka.write(r.text)
             logger.info("Saved!")
 
-def read_file(file_name):
-    with open(file_name, encoding='utf-8') as file:
-        return file.read()
-    
-def write_csv(dictionaries, field_names, file_name):
-    prepare_folder(file_name)
-    with open(file_name, 'w', encoding='utf-8') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=field_names)
-        writer.writeheader()
-        writer.writerows(dictionaries)
+def delete_html(file_name):
+    '''
+    Summary
+    ----------
 
-def write_json(object, file_name):
-    prepare_folder(file_name)
-    with open(file_name, 'w', encoding='utf-8') as json_file:
-        json.dump(object, json_file, indent=4, ensure_ascii=False)
+    Parameters
+    ----------
+
+    Returns
+    ----------
+    '''
+    os.remove(file_name)
+
+def create_partial_df(file_name):
+    '''
+    Summary
+    ----------
+
+    Parameters
+    ----------
+
+    Returns
+    ----------
+    '''
+
+def add_to_df(partial_df):
+    '''
+    Summary
+    ----------
+
+    Parameters
+    ----------
+
+    Returns
+    ----------
+    '''
+
+def main():
+    '''
+    Summary
+    ----------
+
+    Parameters
+    ----------
+
+    Returns
+    ----------
+    '''
+    num_pages = 20
+    df =  pd.DataFrame(data={'Title':[], 'Author':[], 'Narrator':[], 'Release':[], 'Length':[], 'Cost':[], 'Rating':[], 'Categories':[]})
+    for n in range(num_pages):
+        url = page_url(n+1)
+        save_html(url, 'current_page.html')
+        partial_df = create_partial_df('current_page.html')
+        delete_html('current_page.html')
+        add_to_df(partial_df)
+    return df
