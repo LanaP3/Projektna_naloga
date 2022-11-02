@@ -23,8 +23,8 @@ def page_url(n):
 
     Returns
     ----------
-    '''
-    return f'https://www.audible.com/search?feature_six_browse-bin=18685580011&pageSize=50&sort=review-rank&page={n}&ref=a_search_c4_pageNum_{n}'
+    ''' 
+    return f'https://www.audible.com/search?node=18685580011&pageSize=50&sort=popularity-rank&page={n}&ref=a_search_c4_pageNum_{n-1}'
 
 def save_html(url, file_name):
     '''
@@ -54,19 +54,6 @@ def save_html(url, file_name):
             datoteka.write(r.text)
             logger.info("Saved!")
 
-def delete_html(file_name):
-    '''
-    Summary
-    ----------
-
-    Parameters
-    ----------
-
-    Returns
-    ----------
-    '''
-    os.remove(file_name)
-
 def create_partial_df(file_name):
     '''
     Summary
@@ -90,6 +77,15 @@ def add_to_df(partial_df):
     Returns
     ----------
     '''
+    
+def nekineki():
+    re.compile(
+        r"productListItem\" aria-label='(?P<title>.*?)'>"
+        r'bc-size-medium\" >\s*<a class=\"bc-link\s*bc-color-link\" tabindex=\"0\"  href=\"(?P<audiobook_link>.*?)\">'
+        r'Length:(?P<length>.*?)</span>' #2times per audiobook
+        r'Release date:(?P<releade_date>.*?)</span>'
+        r'bc-color-base\"  >Regular price: </span>\s*<span class=\"bc-text\s*bc-size-base \s*bc-color-base\"  >\s*(?P<price>.*?)\s'
+               )
 
 def main():
     '''
@@ -103,11 +99,12 @@ def main():
     ----------
     '''
     num_pages = 20
-    df =  pd.DataFrame(data={'Title':[], 'Author':[], 'Narrator':[], 'Release':[], 'Length':[], 'Cost':[], 'Rating':[], 'Categories':[]})
+    df =  pd.DataFrame(data={'Title':[], 'Author':[], 'Narrator':[], 'Release':[], 'Length':[], 'Price':[], 'Rating':[], 'Categories':[]})
     for n in range(num_pages):
         url = page_url(n+1)
-        save_html(url, 'current_page.html')
-        partial_df = create_partial_df('current_page.html')
-        delete_html('current_page.html')
+        save_html(url, f'page_{n+1}.html')
+    for html_file in os.listdir('html_files'):
+        html_filename = '...'
+        partial_df = create_partial_df(html_filename)
         add_to_df(partial_df)
     return df
