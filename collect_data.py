@@ -109,20 +109,61 @@ def read_from_html(file_path):
     audiobook_sample = re.compile(
         r"productListItem\" aria-label='(?P<title>.*?)'>.*?"
         r'<li class=\"bc-list-item\" >\s*By:\s*(?P<author>.*?)\s*</li>.*?'
-        r'<li class=\"bc-list-item\" >\s*Narrated by:\s*(?P<narrator>.*?)\s*</li>.*?'
-        r'<p  class=\"bc-text\s*bc-spacing-small\s*bc-spacing-top-none\s*bc-size-small\s*bc-color-base\">\s*<p>(?P<summary>.*?)</p>.*?'
         r'bc-size-medium\" >\s*<a class=\"bc-link\s*bc-color-link\" tabindex=\"0\"  href=\"(?P<audiobook_link>.*?)\">.*?'
         r'Length:(?P<length>.*?)</span>.*?'
-        r'Release date:(?P<release_date>.*?)</span>.*?'
+        r'Release date:(?P<release_date>.*?)</span>.*?',
+        flags=re.DOTALL
+    )
+    summary_sample = re.compile(
+        r'<p  class=\"bc-text\s*bc-spacing-small\s*bc-spacing-top-none\s*bc-size-small\s*bc-color-base\">\s*<p>(?P<summary>.*?)</p>',
+        flags=re.DOTALL
+    )
+    narrator_sample = re.compile(
+        r'<li class=\"bc-list-item\" >\s*Narrated by:\s*(?P<narrator>.*?)\s*</li>',
+        flags=re.DOTALL
+    )
+    price_sample = re.compile(
         r'bc-color-base\"  >Regular price: </span>\s*<span class=\"bc-text\s*bc-size-base \s*bc-color-base\"  >\s*(?P<price>.*?)\s',
         flags=re.DOTALL
     )
-
+    alternative_price_sample = re.compile(
+        r'Regular price: </span>\s*<span class=\"bc-text\s*bc-size-small\s*bc-color-secondary\s*bc-text-strike\"  >\s*(?P<price>.*?)</span>',
+        flags=re.DOTALL
+    )
+    
+    n=0
     for block in block_sample.finditer(html):
         audiobook = audiobook_sample.search(block.group(0)).groupdict()
-        audiobook['summary'] = audiobook['summary'].replace('<i>','').replace('</i>','').strip()
         audiobook['release_date'] = audiobook['release_date'].strip()
-        yield audiobook
+        audiobook['author'] = audiobook['author'].replace('"','')
+
+        # add summary
+        summary = summary_sample.search(block.group(0))
+        if summary:
+            audiobook['summary'] = str(summary['summary'])
+            audiobook['summary'] = audiobook['summary'].replace('<i>','').replace('</i>','').replace('"','').strip()
+        if not summary:
+            audiobook['summary'] = None
+        
+        # add price
+        price = price_sample.search(block.group(0))
+        alternative_price = alternative_price_sample.search(block.group(0))
+        if price:
+            audiobook['price'] = str(price['price'])
+        if alternative_price:
+            audiobook['price'] = str(alternative_price['price'])
+        
+        # check if narrator, skip audiobook if not (not yet released)
+        title = audiobook['title']
+        narrator = narrator_sample.search(block.group(0))
+        if narrator:
+            audiobook['narrator'] = str(narrator['narrator']).replace('"','')
+            yield(audiobook)
+            logger.info(f'{title} saved!')
+        # logging
+        if not narrator:
+            logger.info(f'{title} is not yet released!')
+        
 
 def save_all_html():
     for n in range(24):
@@ -143,11 +184,14 @@ def main():
     #df =  pd.DataFrame(data={'Title':[], 'Author':[], 'Narrator':[], 'Release':[], 'Length':[], 'Price':[], 'Rating':[], 'Categories':[]})
     audiobooks = []
     for file_name in os.listdir('html_files'):
+        logger.info(f'Reading from {file_name}.............')
         html_path = os.path.join('html_files', file_name)
         for audiobook in read_from_html(html_path):
             audiobooks.append(audiobook)
     field_names = ['title', 'author', 'narrator', 'summary', 'audiobook_link', 'length', 'release_date', 'price']
     write_csv(audiobooks, field_names, 'audiobooks.csv')
-#read_from_html('html_files/page_2.html')
+
+
+#read_from_html('html_files/page_10.html')
 #save_all_html()
 main()
