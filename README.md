@@ -10,7 +10,7 @@ For each audiobook I will cover:
 * release date
 * length
 * author and narrator
-* cost
+* price
 * rating
 * categories
 
