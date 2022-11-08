@@ -56,7 +56,7 @@ def save_html(url, file_name):
         logger.info(f'Saving {url}...')
         sys.stdout.flush()
         if os.path.isfile(file_name):
-            logger.info('Allready saved!')
+            logger.info('Already saved!')
             return
         r = requests.get(url)
     except requests.exceptions.ConnectionError:
