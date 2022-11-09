@@ -13,10 +13,10 @@ For each audiobook I will cover:
 * summary
 * author and narrator
 * price
-* rating
+* ratings
 * categories
 
-I am going to get the title, audiobook id, release date, length, price, summary, author and narrator for each book from the search. This data is stored in audiobooks.csv file. Furthermore, I will also cover secific ratings and categories of each audiobook. This is done by visiting the actual audiobook webpage.
+I am going to get the title, audiobook id, release date, length, price, summary, author and narrator for each book from the search. This data is stored in audiobooks.csv file. Furthermore, I will also cover specific ratings and categories of each audiobook. This is done by visiting the actual audiobook webpage.
 
 ## Hypotheses
 
