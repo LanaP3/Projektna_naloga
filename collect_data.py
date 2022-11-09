@@ -142,7 +142,7 @@ def read_from_html(file_path):
         audiobook['author'] = audiobook['author'].replace('"','')
 
         # add id
-        audiobook['audiobook_id'] = audiobook['audiobook_link'][:10]
+        audiobook['audiobook_id'] = audiobook['audiobook_link'][:10] # should have used [-10:]... fixed in the end
 
         # add summary
         summary = summary_sample.search(block.group(0))
@@ -290,3 +290,18 @@ def main():
 
 
 #main()
+
+# when creating audiobook_id column, used [:10] instead of [-10:]
+# forgot to write audiobook_id column in audiobooks_2.csv, they are in the same order as in audiobooks.csv, therefore I will just copy the row
+# the following function will fix these problems:
+def correct_missing_ids():
+    df = pd.read_csv(".\\audiobooks.csv")
+    df_2 = pd.read_csv(".\\audiobooks_2.csv")
+    id_column = df['audiobook_link'].apply(lambda x: x[-10:])
+    df['audiobook_id'] = id_column
+    df_2['audiobook_id'] = id_column
+    # update files
+    df.to_csv(".\\audiobooks.csv")
+    df_2.to_csv(".\\audiobooks_2.csv")
+
+#correct_missing_ids()
