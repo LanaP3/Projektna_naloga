@@ -7,8 +7,8 @@ import sys
 import logging
 import re
 from datetime import datetime
-from datetime import date
 import pandas as pd
+import time
 
 # logging
 LOGGER = logging.getLogger()
@@ -57,7 +57,6 @@ def save_html(url, file_name):
         sys.stdout.flush()
         if os.path.isfile(file_name):
             logger.info('Already saved!')
-            return
         r = requests.get(url)
     except requests.exceptions.ConnectionError:
         logger.info("Webpage doesn't exist!")
@@ -67,7 +66,7 @@ def save_html(url, file_name):
             os.makedirs(location, exist_ok=True)
         with open(file_name, 'w', encoding='utf-8') as datoteka:
             datoteka.write(r.text)
-            logger.info("Saved!")
+            logger.info("HTML saved!")
     
 def write_csv(dictionaries, field_names, file_name):
     '''
@@ -131,8 +130,13 @@ def read_from_html(file_path):
         r'Regular price: </span>\s*<span class=\"bc-text\s*bc-size-small\s*bc-color-secondary\s*bc-text-strike\"  >\s*(?P<price>.*?)</span>',
         flags=re.DOTALL
     )
+    not_rated_str = 'Not rated yet'
     
     for block in block_sample.finditer(html):
+
+        # audiobook hasn't been rated yet
+        if not_rated_str in block.group(0):
+            continue
         audiobook = audiobook_sample.search(block.group(0)).groupdict()
         audiobook['release_date'] = audiobook['release_date'].strip()
         audiobook['author'] = audiobook['author'].replace('"','')
@@ -156,15 +160,7 @@ def read_from_html(file_path):
         if alternative_price:
             audiobook['price'] = str(alternative_price['price'])
         
-        ## check if narrator, skip audiobook if not (not yet released)
         title = audiobook['title']
-        #narrator = narrator_sample.search(block.group(0))
-        #if narrator:
-        #    
-        #    audiobook['narrator'] = str(narrator['narrator']).replace('"','')
-        #    yield(audiobook)
-        #    logger.info(f'{title} saved!')
-        
         # check if already released
         release_date_str = audiobook['release_date']
         release_date = datetime.strptime(release_date_str, '%m-%d-%y')
@@ -196,23 +192,6 @@ def save_all_html():
     for n in range(24):
         page_url = find_page_url(n+1)
         save_html(page_url, f'page_{n+1}.html')
-
-def main():
-    '''
-    Summary
-    ----------
-
-    Returns
-    ----------
-    '''
-    audiobooks = []
-    for file_name in os.listdir('html_files'):
-        logger.info(f'Reading from {file_name}.............')
-        html_path = os.path.join('html_files', file_name)
-        for audiobook in read_from_html(html_path):
-            audiobooks.append(audiobook)
-    field_names = ['audiobook_id', 'title', 'author', 'narrator', 'summary', 'audiobook_link', 'length', 'release_date', 'price']
-    write_csv(audiobooks, field_names, 'audiobooks.csv')
 
 def read_from_html_2(file_path):
     '''
@@ -246,42 +225,68 @@ def read_from_html_2(file_path):
     audiobook['categories'] = categories['categories']
     return audiobook
 
-def main_2(file_path):
+def check_if_valid(file_path):
     '''
     Summary
     ----------
-    - Read csv file
-    - Open web page for each audiobook
-    - Download html
-    - Collect ratings and categories
-    - Delete html
-    - Save to a new csv file
 
     Parameters
     ----------
-    file_path(str): path to the csv file with audiobooks data
+
+    Returns
+    ----------
+    '''
+    with open(file_path, encoding='utf-8') as f:
+        html =  f.read()
+    return html != ''
+
+def main():
+    '''
+    Summary
+    ----------
+
+    Returns
+    ----------
     '''
     audiobooks = []
-    df = pd.read_csv(file_path)
-    for i, row in df.iterrows():
-        url = find_audiobook_url(row['audiobook_link'])
-        logger.info(f'Opening {url}...')
-        save_html(url, f'current_audiobook.html')
-        audiobook = read_from_html_2('current_audiobook.html')
-        audiobooks.append(audiobook)
-        # logging
-        title = row['title']
-        logger.info(f'Data for {title} is saved!')
-        os.remove('current_audiobook.html')
-    field_names = ['audiobook_id', 'categories', 'rating_overall', 'rating_performance', 'rating_story']
+    audiobooks_2 = []
+    for file_name in os.listdir('html_files'):
+        logger.info(f'Reading from {file_name}.............')
+        html_path = os.path.join('html_files', file_name)
+        for audiobook in read_from_html(html_path):
+
+            ## create row for audiobooks.csv
+            #audiobooks.append(audiobook)
+
+            # open audiobook link
+            title = audiobook['title']
+            logger.info(f'Opening page for {title}...')
+            url = find_audiobook_url(audiobook['audiobook_link'])
+            # try to open the webpage
+            request = requests.get(url)
+            if request.status_code == 200:
+                save_html(url, f'current_audiobook.html')
+                # check if valid 
+                if check_if_valid('current_audiobook.html'):
+                    audiobook_2 = read_from_html_2('current_audiobook.html')
+                    audiobooks_2.append(audiobook_2)
+                    # add row to audiobooks.csv
+                    audiobooks.append(audiobook)
+                    os.remove('current_audiobook.html')
+
+                    # logging
+                    logger.info(f'Data for {title} is saved!')
+                else:
+                    logger.info('Something went wrong when downloading webpage html...')
+
+            else:
+                logger.info("Audiobook webpage doesn't exist...")
+
+    field_names = ['audiobook_id', 'title', 'author', 'narrator', 'summary', 'audiobook_link', 'length', 'release_date', 'price']
     write_csv(audiobooks, field_names, 'audiobooks.csv')
 
-    
-    
+    field_names_2 = ['audiobook_id', 'categories', 'rating_overall', 'rating_performance', 'rating_story']
+    write_csv(audiobooks_2, field_names_2, 'audiobooks_2.csv')
 
 
-#read_from_html('html_files/page_10.html')
-#save_all_html()
 #main()
-#print(read_from_html_2('current_audiobook.html'))
-main_2('audiobooks.csv')
