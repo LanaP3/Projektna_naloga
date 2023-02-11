@@ -30,3 +30,7 @@ I am going to get the title, audiobook id, release date, length, price, summary,
 
 3) Can we predict the price of the audiobook?
 
+## Sources
+
+https://archive.ics.uci.edu/ml/datasets.php
+
