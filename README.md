@@ -34,6 +34,6 @@ Najprej bom iz spletne strani pobrala omenjene podatke in jih spravila v audiobo
 
 ## Viri
 
-[Baza podatkov z imeni](https://archive.ics.uci.edu/ml/datasets.php)
-[Zapiski iz predavanj](https://matija.pretnar.info/programiranje-1/00-uvod.html)
+* [Baza podatkov z imeni](https://archive.ics.uci.edu/ml/datasets.php)
+* [Zapiski iz predavanj](https://matija.pretnar.info/programiranje-1/00-uvod.html)
 
