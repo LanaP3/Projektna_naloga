@@ -1,36 +1,39 @@
 # Projektna_naloga
 
-School project for the subject __Programiranje 1__. 
-I will analyze the first 24 pages (~1000 samples) of best-selling audiobooks in English on the [Audible](https://www.audible.com/search) website.
+Projekt pri predmetu __Programiranje 1__. 
+Analizirala bom prvih 24 strani (~1000 vzorcev) najbolj prodajanih avdioknjig v angleškem jeziku na spletni strani [Audible](https://www.audible.com/search) .
 
-## Data
+## Podatki
 
-For each audiobook I will cover:
-* title
-* audiobook id
-* release date
-* length
-* summary
-* author and narrator
-* price
-* ratings
-* categories
+Za vsako avdio knjigo bom pokrila:
+* naslov
+* id knjige
+* datum izida
+* dolžina
+* opis
+* avtor in bralec
+* cena
+* ocena
+* kategorije
 
-I am going to get the title, audiobook id, release date, length, price, summary, author and narrator for each book from the search. This data is stored in audiobooks.csv file. Furthermore, I will also cover specific ratings and categories of each audiobook. This is done by visiting the actual audiobook webpage.
+Najprej bom iz spletne strani pobrala omenjene podatke in jih spravila v audiobooks.csv. Pri tem posamezne ocene in kategorije pobiram ločene strani dane knjige.
 
-## Hypotheses
+## Hipoteze in ugotovitve
 
-1) Price depends on release date
+1) Cena je odvisna od leta izida
   
-  <sup>I assume newer books have a higher price-to-length ratio.</sup>
+  <sup>To hipotezo lahko hitro ovržemo. Že iz korelacijskega grafa se hitro vidi, da je cena praktično neodvisna od datuma izida. Še največjo povezavo ima z dolžino. </sup>
 
-2) There is a correlation between rating and category
+2) Iz opisa znamo napovedati kategorijo
 
-  <sup>For example, self improvement audiobooks could have on average higher scores than romance audibooks.</sup>
+  <sup>Za to sem napisala naivni bayesov klasifikator, v pomoč so mi bili zapiski iz predavanj. Več se nahaja v category_bayes.ipynb</sup>
 
-3) Can we predict the price of the audiobook?
+3) Iz ostalih podatkov znamo napovedati ceno knjige
 
-## Sources
+  <sup>Z različnimi modeli strojnega učenja sem iz ostalih podatkov poskušala predvideti ceno knjig. Pri tem me je začela bolj zanimati primerjava uspešnosti med njimi. Več o tem je zapisano v predict_price.ipynb</sup>
 
-https://archive.ics.uci.edu/ml/datasets.php
+## Viri
+
+[Baza podatkov z imeni](https://archive.ics.uci.edu/ml/datasets.php)
+[Zapiski iz predavanj](https://matija.pretnar.info/programiranje-1/00-uvod.html)
 
