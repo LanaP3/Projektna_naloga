@@ -16,42 +16,12 @@ logging.basicConfig(
     format = "%(asctime)s %(name)-12s %(levelname)-8s %(message)s", level = logging.INFO)
 
 def find_page_url(n):
-    '''
-    Summary
-    ----------
-
-    Parameters
-    ----------
-
-    Returns
-    ----------
-    ''' 
     return f'https://www.audible.com/search?node=18685580011&pageSize=50&sort=popularity-rank&page={n}&ref=a_search_c4_pageNum_{n-1}'
 
 def find_audiobook_url(audiobook_link):
-    '''
-    Summary
-    ----------
-
-    Parameters
-    ----------
-
-    Returns
-    ----------
-    ''' 
     return 'https://www.audible.com'+audiobook_link
 
 def save_html(url, file_name):
-    '''
-    Summary
-    ----------
-
-    Parameters
-    ----------
-
-    Returns
-    ----------
-    '''
     try:
         logger.info(f'Saving {url}...')
         sys.stdout.flush()
@@ -69,16 +39,6 @@ def save_html(url, file_name):
             logger.info("HTML saved!")
     
 def write_csv(dictionaries, field_names, file_name):
-    '''
-    Summary
-    ----------
-
-    Parameters
-    ----------
-
-    Returns
-    ----------
-    '''
     location = os.path.dirname(file_name)
     if location:
         os.makedirs(location, exist_ok=True)
@@ -88,16 +48,6 @@ def write_csv(dictionaries, field_names, file_name):
         writer.writerows(dictionaries)
 
 def read_from_html(file_path):
-    '''
-    Summary
-    ----------
-
-    Parameters
-    ----------
-
-    Yields
-    ----------
-    '''
     with open(file_path, encoding='utf-8') as f:
         html =  f.read()
     
@@ -179,31 +129,11 @@ def read_from_html(file_path):
             logger.info(f'{title} is not yet released!')
         
 def save_all_html():
-    '''
-    Summary
-    ----------
-
-    Parameters
-    ----------
-
-    Returns
-    ----------
-    '''
     for n in range(24):
         page_url = find_page_url(n+1)
         save_html(page_url, f'page_{n+1}.html')
 
 def read_from_html_2(file_path):
-    '''
-    Summary
-    ----------
-
-    Parameters
-    ----------
-
-    Returns
-    ----------
-    '''
     with open(file_path, encoding='utf-8') as f:
         html =  f.read()
 
@@ -226,28 +156,11 @@ def read_from_html_2(file_path):
     return audiobook
 
 def check_if_valid(file_path):
-    '''
-    Summary
-    ----------
-
-    Parameters
-    ----------
-
-    Returns
-    ----------
-    '''
     with open(file_path, encoding='utf-8') as f:
         html =  f.read()
     return html != ''
 
 def main():
-    '''
-    Summary
-    ----------
-
-    Returns
-    ----------
-    '''
     audiobooks = []
     audiobooks_2 = []
     for file_name in os.listdir('html_files'):
@@ -292,7 +205,7 @@ def main():
 #main()
 
 # when creating audiobook_id column, used [:10] instead of [-10:]
-# forgot to write audiobook_id column in audiobooks_2.csv, they are in the same order as in audiobooks.csv, therefore I will just copy the row
+# forgot to write audiobook_id column in audiobooks_2.csv, they are in the same order as in audiobooks.csv, I will just copy the row
 # the following function will fix these problems:
 def correct_missing_ids():
     df = pd.read_csv(".\\audiobooks.csv")
